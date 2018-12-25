@@ -93,69 +93,100 @@ const STEPS = [
 
 class Loader extends React.Component {
 
+    getRawReq(req) {
+        return (req instanceof UsesUpType) ? req.type : req;
+    }
+
     satisfiesRequirement(req, materials) {
         return (req instanceof UsesUpType && materials.has(req.type)) || materials.has(req);
     }
 
-    getNextColumn(steps, materials) {
+    getNextColumn(steps, materials, sources) {
         let nextMaterials = new Set(materials);
         let nextSteps = [];
         let remainingSteps = [];
+        let nextSources = {...sources};
 
         steps.forEach(step => {
             if (step.requirements.map(req => this.satisfiesRequirement(req, materials)).reduce((acc, curr) => acc && curr)) {
                 nextSteps.push(step);
                 nextMaterials = new Set([...nextMaterials, ...step.outputs]);
+                step.outputs.forEach(o => nextSources[o] = step.name);
             } else {
                 remainingSteps.push(step);
             }
         });
 
         return {
-            nextMaterials: new Set(nextMaterials), nextSteps, remainingSteps
+            nextMaterials: new Set(nextMaterials), nextSteps, remainingSteps, nextSources
         };
     }
 
-    getColumns() {
+    getColumnsWithSources() {
         let columns = [];
         let materials = STARTING_MATERIALS;
         let remainingSteps = STEPS;
         let counter = 0;
+        let sources = {};
         while (counter < 4 && remainingSteps !== []) {
-            const next = this.getNextColumn(remainingSteps, materials);
+            const next = this.getNextColumn(remainingSteps, materials, sources);
             columns.push(next.nextSteps);
             remainingSteps = next.remainingSteps;
             materials = next.nextMaterials;
+            sources = next.nextSources;
             counter++;
         }
 
-        return columns;
+        return {columns, sources};
     }
 
     componentDidMount() {
-        this.connectionRef.current.allComponentsDidMount();
+        this.connectionRefs.forEach(ref => ref.current.allComponentsDidMount());
     }
 
     render() {
-        const columns = this.getColumns();
+        const columnsWithSources = this.getColumnsWithSources();
+        const columns = columnsWithSources.columns;
+        const sources = columnsWithSources.sources;
 
         let stepRefs = {};
+        this.connectionRefs = [];
+        let connections = [];
         columns.forEach(
             column =>
                 column.forEach(
-                    step => stepRefs[step.name] = React.createRef()
+                    step => {
+                        stepRefs[step.name] = React.createRef();
+
+                        step.requirements.forEach(
+                            req => {
+                                connections.push([sources[this.getRawReq(req)], step.name]);
+                            }
+                        )
+                    }
                 )
         );
-
-        this.connectionRef = React.createRef();
 
         return (
             <>
                 <SVGContainer>
-                    <Connection ref={this.connectionRef}
-                        startRef={stepRefs["Go to passport place"]}
-                        endRef={stepRefs["Get copies of court order"]}
-                        />
+                    {connections.map(
+                        connection => {
+                            if (!connection[0]) {
+                                return null;
+                            }
+                            const ref = React.createRef();
+                            this.connectionRefs.push(ref);
+                            return (
+                                <Connection
+                                    key={connection[0] + '.' + connection[1]}
+                                    ref={ref}
+                                    startRef={stepRefs[connection[0]]}
+                                    endRef={stepRefs[connection[1]]}
+                                    />
+                                )}
+                    )}
+                    
                 </SVGContainer>
                 <div className="overviewContainer">
                     {columns.map(
