@@ -5,6 +5,9 @@
 
  import $ from 'jquery'
 
+const GUTTER_WIDTH = 80;
+const COLUMN_WIDTH = 300;
+
 //helper functions, it turned out chrome doesn't support Math.sgn() 
 function signum(x) {
     return (x < 0) ? -1 : 1;
@@ -34,20 +37,21 @@ function drawPath(svg, path, startX, startY, endX, endY) {
         arc1 = 1;
         arc2 = 0;
     }
+
+    // Shift right by half a gutter so that each colum
+    // includes the gutter to the left of it
+    const lastGutter = Math.floor((endX + GUTTER_WIDTH / 2) / (COLUMN_WIDTH + GUTTER_WIDTH));
+    const riseX = lastGutter * (COLUMN_WIDTH + GUTTER_WIDTH) - GUTTER_WIDTH / 2;
+
+    console.log('end X: ' + endX + ' lastGutter: ' + lastGutter + ' riseX: ' + riseX);
+
     // draw tha pipe-like path
     // 1. move a bit down, 2. arch,  3. move a bit to the right, 4.arch, 5. move down to the end 
-    // path.attr("d",  "M"  + startX + " " + startY +
-    //                 " V" + (startY + delta) +
-    //                 " A" + delta + " " +  delta + " 0 0 " + arc1 + " " + (startX + delta*signum(deltaX)) + " " + (startY + 2*delta) +
-    //                 " H" + (endX - delta*signum(deltaX)) + 
-    //                 " A" + delta + " " +  delta + " 0 0 " + arc2 + " " + endX + " " + (startY + 3*delta) +
-    //                 " V" + endY );
-
     path.attr("d",  "M"  + startX + " " + startY +
-    " H" + (startX + delta) +
-    " A" + delta + " " +  delta + " 0 0 " + arc1 + " " + (startX + 2*delta) + " " + (startY+ delta*signum(deltaY)) +
+    " H" + (riseX) +
+    " A" + delta + " " +  delta + " 0 0 " + arc1 + " " + (riseX + delta) + " " + (startY+ delta*signum(deltaY)) +
     " V" + (endY - delta*signum(deltaY)) + 
-    " A" + delta + " " +  delta + " 0 0 " + arc2 + " " + (startX + 3*delta) + " " + (endY) +
+    " A" + delta + " " +  delta + " 0 0 " + arc2 + " " + (riseX + 2*delta) + " " + (endY) +
     " H" + endX );
 }
 
