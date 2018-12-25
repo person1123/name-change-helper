@@ -3,6 +3,7 @@ import Step from './step';
 import './App.css';
 import SVGContainer from './svgContainer';
 import Connection from './connection';
+import $ from 'jquery';
 
 const ReqTypes = {
     "MONEY": 0,
@@ -19,6 +20,28 @@ const ReqTypes = {
     "PASSPORT": 11
 }
 
+const ReqTypeNames = {
+    [ReqTypes.MONEY]: 'Dollars',
+    [ReqTypes.THERAPIST]: 'Therapist',
+    [ReqTypes.PHYSICIAN]: 'Physician',
+    [ReqTypes.THERAPIST_LETTER]: 'Letter from therapist',
+    [ReqTypes.PHYSICIAN_LETTER]: 'Letter from physician',
+    [ReqTypes.COURT_ORDER]: 'Court order of name change',
+    [ReqTypes.SOCIAL_SECURITY_CARD]: 'Updated social security card',
+    [ReqTypes.MVA_LETTER]: 'MVA letter certifying gender change',
+    [ReqTypes.DIGIAL_SOCIAL_SECURITY_UPDATE]: 'Updated name in Social Security computer systems',
+    [ReqTypes.INITIAL_COURT_ORDER]: 'Court order of name change',
+    [ReqTypes.DRIVERS_LICENSE]: 'Updated driver\'s license',
+    [ReqTypes.PASSPORT]: 'Updated passport'
+}
+
+export function nameOfReq(req) {
+    if (typeof req === "number") {
+        return ReqTypeNames[req];
+    }
+    return req.toString();
+}
+
 class UsesUpType {
     constructor(type, amount) {
         this.type = type;
@@ -26,7 +49,7 @@ class UsesUpType {
     }
 
     toString() {
-        return '' + this.amount + ' of ' + this.type;
+        return '' + this.amount + ' ' + nameOfReq(this.type);
     }
 }
 
@@ -142,6 +165,14 @@ class Loader extends React.Component {
 
     componentDidMount() {
         this.connectionRefs.forEach(ref => ref.current.allComponentsDidMount());
+
+        $('.overviewContainer').scroll(
+            e => {
+                $('.svgContainer').css({
+                    left: -$('.overviewContainer').scrollLeft()
+                });
+            }
+        )
     }
 
     render() {

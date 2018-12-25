@@ -1,4 +1,5 @@
 import React from 'react';
+import {nameOfReq} from './loader';
 
 /* 
     {
@@ -18,7 +19,7 @@ class Step extends React.Component {
                 <ul>
                     {this.props.requirements.map(
                         element =>
-                            <li key={element.toString()}>{element.toString()}</li>
+                            <li key={element.toString()}>{nameOfReq(element)}</li>
                     )}
                 </ul>
             </div>

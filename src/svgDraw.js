@@ -43,8 +43,6 @@ function drawPath(svg, path, startX, startY, endX, endY) {
     const lastGutter = Math.floor((endX + GUTTER_WIDTH / 2) / (COLUMN_WIDTH + GUTTER_WIDTH));
     const riseX = lastGutter * (COLUMN_WIDTH + GUTTER_WIDTH) - GUTTER_WIDTH / 2;
 
-    console.log('end X: ' + endX + ' lastGutter: ' + lastGutter + ' riseX: ' + riseX);
-
     // draw tha pipe-like path
     // 1. move a bit down, 2. arch,  3. move a bit to the right, 4.arch, 5. move down to the end 
     path.attr("d",  "M"  + startX + " " + startY +
@@ -102,7 +100,6 @@ class SVGDraw {
     }
 
     connectAll() {
-        console.log(this.connections);
         this.connections.forEach(
             connection => 
                 connectElements(

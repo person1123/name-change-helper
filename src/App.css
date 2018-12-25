@@ -3,6 +3,10 @@
   display: flex;
 }
 
+.svgScroller {
+  overflow-x: auto;
+}
+
 .column {
   min-width: 300px;
   width: 300px;
