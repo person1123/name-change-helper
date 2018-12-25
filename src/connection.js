@@ -15,10 +15,10 @@ class Connection extends React.Component {
     }
 
     render() {
-        const stroke = 'rgba(' +
-            (Math.random() * 255) + ',' +
-            (Math.random() * 255) + ',' +
-            (Math.random() * 255) + ')';
+        const stroke = 'rgb(' +
+            Math.floor(Math.random() * 255) + ',' +
+            Math.floor(Math.random() * 255) + ',' +
+            Math.floor(Math.random() * 255) + ')';
         return (
             <path d="M0 0" stroke={stroke} fill="none" strokeWidth="12px"/>
         );
