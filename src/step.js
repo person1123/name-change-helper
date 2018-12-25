@@ -1,7 +1,7 @@
 import React from 'react';
 import {nameOfReq} from './loader';
 
-/* 
+/*
     {
         name: "File name change petition",
         description: "Go to court and file a petition for name change!",
@@ -16,8 +16,16 @@ class Step extends React.Component {
             <div className="smallStep">
                 <h3>{this.props.name}</h3>
                 <span>{this.props.description}</span>
+                <div style={{fontWeight: 'bold', marginTop:'12px'}}>Required:</div>
                 <ul>
                     {this.props.requirements.map(
+                        element =>
+                            <li key={element.toString()}>{nameOfReq(element)}</li>
+                    )}
+                </ul>
+                <div style={{fontWeight: 'bold'}}>Gives You:</div>
+                <ul>
+                    {this.props.outputs.map(
                         element =>
                             <li key={element.toString()}>{nameOfReq(element)}</li>
                     )}
