@@ -52,15 +52,12 @@ function drawPath(svg, path, startX, startY, endX, endY) {
 }
 
 function connectElements(svgContainer, svg, path, startElem, endElem) {
-    console.log(svgContainer);
     // if first element is further rigth than the second, swap!
     if(startElem.offset().left > endElem.offset().left){
         var temp = startElem;
         startElem = endElem;
         endElem = temp;
     }
-
-    console.log(svgContainer.offset());
 
     // get (top, left) corner coordinates of the svg container   
     var svgTop  = svgContainer.offset().top;
@@ -70,14 +67,17 @@ function connectElements(svgContainer, svg, path, startElem, endElem) {
     var startCoord = startElem.offset();
     var endCoord   = endElem.offset();
 
+    const tweakWeight = 0.2;
+    const tweak = (endCoord.top - startCoord.top) / svgContainer.outerHeight();
+
     // calculate path's start (x,y)  coords
     // we want the x coordinate to visually result in the element's mid point
     var startX = startCoord.left + startElem.outerWidth() - svgLeft;    // x = left offset + width - svg's left offset
-    var startY = startCoord.top  + 0.5*startElem.outerHeight() - svgTop;        // y = top offset + 0.5*height - svg's top offset
+    var startY = startCoord.top  + (0.5 + tweakWeight * tweak)*startElem.outerHeight() - svgTop;        // y = top offset + 0.5*height - svg's top offset
 
         // calculate path's end (x,y) coords
     var endX = endCoord.left - svgLeft;
-    var endY = endCoord.top + 0.5*endElem.outerHeight()  - svgTop;
+    var endY = endCoord.top + (0.5 - tweakWeight * tweak)*endElem.outerHeight()  - svgTop;
 
     // call function for drawing the path
     drawPath(svg, path, startX, startY, endX, endY);
