@@ -1,6 +1,8 @@
 import React from 'react';
 import Step from './step';
 import './App.css';
+import SVGContainer from './svgContainer';
+import Connection from './connection';
 
 const ReqTypes = {
     "MONEY": 0,
@@ -92,10 +94,6 @@ const STEPS = [
 class Loader extends React.Component {
 
     satisfiesRequirement(req, materials) {
-        console.log(req);
-        console.log(materials);
-        console.log(req instanceof UsesUpType);
-        console.log(materials.has(req))
         return (req instanceof UsesUpType && materials.has(req.type)) || materials.has(req);
     }
 
@@ -124,29 +122,51 @@ class Loader extends React.Component {
         let remainingSteps = STEPS;
         let counter = 0;
         while (counter < 4 && remainingSteps !== []) {
-            console.log(materials);
             const next = this.getNextColumn(remainingSteps, materials);
             columns.push(next.nextSteps);
             remainingSteps = next.remainingSteps;
             materials = next.nextMaterials;
-            console.log(remainingSteps);
             counter++;
         }
 
         return columns;
     }
 
+    componentDidMount() {
+        this.connectionRef.current.allComponentsDidMount();
+    }
+
     render() {
+        const columns = this.getColumns();
+
+        let stepRefs = {};
+        columns.forEach(
+            column =>
+                column.forEach(
+                    step => stepRefs[step.name] = React.createRef()
+                )
+        );
+
+        this.connectionRef = React.createRef();
+
         return (
-            <div>
-                {this.getColumns().map(
-                    (column, index) => (
-                        <div className="column" key={index}>
-                            {column.map(step => <Step key={step.name} {...step} />)}
-                        </div>
-                    )
-                )}
-            </div>
+            <>
+                <SVGContainer>
+                    <Connection ref={this.connectionRef}
+                        startRef={stepRefs["Go to passport place"]}
+                        endRef={stepRefs["Get copies of court order"]}
+                        />
+                </SVGContainer>
+                <div className="overviewContainer">
+                    {columns.map(
+                        (column, index) => (
+                            <div className="column" key={index}>
+                                {column.map(step => <Step ref={stepRefs[step.name]} key={step.name} {...step} />)}
+                            </div>
+                        )
+                    )}
+                </div>
+            </>
         )
     }
 }

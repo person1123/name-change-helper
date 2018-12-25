@@ -1,4 +1,24 @@
+.overviewContainer {
+  overflow-x: auto;
+  display: flex;
+}
+
 .column {
-  width: 200px;
-  display: inline-block;
+  min-width: 300px;
+  width: 350px;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+
+.smallStep {
+  background: #ddd;
+  margin: 20px;
+  padding: 12px;
+}
+
+.svgContainer { 
+	z-index: -10;
+	position:absolute;
+	opacity: 0.5;
 }

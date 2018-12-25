@@ -12,7 +12,7 @@ import React from 'react';
 class Step extends React.Component {
     render() {
         return (
-            <div>
+            <div className="smallStep">
                 <h3>{this.props.name}</h3>
                 <span>{this.props.description}</span>
                 <ul>
