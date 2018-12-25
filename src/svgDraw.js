@@ -45,7 +45,7 @@ function drawPath(svg, path, startX, startY, endX, endY) {
 
     path.attr("d",  "M"  + startX + " " + startY +
     " H" + (startX + delta) +
-    " A" + delta + " " +  delta + " 0 0 " + arc1 + " " + (startX + 2*delta) + " " + (startY+ delta*signum(deltaX)) +
+    " A" + delta + " " +  delta + " 0 0 " + arc1 + " " + (startX + 2*delta) + " " + (startY+ delta*signum(deltaY)) +
     " V" + (endY - delta*signum(deltaY)) + 
     " A" + delta + " " +  delta + " 0 0 " + arc2 + " " + (startX + 3*delta) + " " + (endY) +
     " H" + endX );
