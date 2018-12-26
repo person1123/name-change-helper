@@ -6,7 +6,7 @@
  import $ from 'jquery'
 
 const GUTTER_WIDTH = 80;
-const COLUMN_WIDTH = 300;
+const COLUMN_WIDTH = 350;
 
 //helper functions, it turned out chrome doesn't support Math.sgn() 
 function signum(x) {
