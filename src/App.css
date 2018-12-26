@@ -19,10 +19,18 @@
   background: #ddd;
   margin-top: 20px;
   margin-bottom: 20px;
-  padding: 12px;
+  padding: 20px;
+}
+.smallStep.available {
+  background: #fff;
+  border: 2px solid #ddd;
+}
+.smallStep.done {
+  background: #eee;
+  border: 2px solid #ddd;
 }
 
-.svgContainer { 
+.svgContainer {
 	z-index: -10;
 	position:absolute;
 	opacity: 0.5;
