@@ -4,117 +4,14 @@ import './App.css';
 import SVGContainer from './svgContainer';
 import Connection from './connection';
 import $ from 'jquery';
-
-const ReqTypes = {
-    "MONEY": 0,
-    "THERAPIST": 1,
-    "PHYSICIAN": 2,
-    "THERAPIST_LETTER": 3,
-    "PHYSICIAN_LETTER": 4,
-    "COURT_ORDER": 5,
-    "SOCIAL_SECURITY_CARD": 6,
-    "MVA_LETTER": 7,
-    "DIGIAL_SOCIAL_SECURITY_UPDATE": 8,
-    "INITIAL_COURT_ORDER": 9,
-    "DRIVERS_LICENSE": 10,
-    "PASSPORT": 11
-}
-
-const ReqTypeNames = {
-    [ReqTypes.MONEY]: 'Dollars',
-    [ReqTypes.THERAPIST]: 'Therapist',
-    [ReqTypes.PHYSICIAN]: 'Physician',
-    [ReqTypes.THERAPIST_LETTER]: 'Letter from therapist',
-    [ReqTypes.PHYSICIAN_LETTER]: 'Letter from physician',
-    [ReqTypes.COURT_ORDER]: 'Court order of name change',
-    [ReqTypes.SOCIAL_SECURITY_CARD]: 'Updated social security card',
-    [ReqTypes.MVA_LETTER]: 'MVA letter certifying gender change',
-    [ReqTypes.DIGIAL_SOCIAL_SECURITY_UPDATE]: 'Updated name in Social Security computer systems',
-    [ReqTypes.INITIAL_COURT_ORDER]: 'Court order of name change',
-    [ReqTypes.DRIVERS_LICENSE]: 'Updated driver\'s license',
-    [ReqTypes.PASSPORT]: 'Updated passport'
-}
-
-export function nameOfReq(req) {
-    if (typeof req === "number") {
-        return ReqTypeNames[req];
-    }
-    return req.toString();
-}
-
-class UsesUpType {
-    constructor(type, amount) {
-        this.type = type;
-        this.amount = amount;
-    }
-
-    toString() {
-        return '' + this.amount + ' ' + nameOfReq(this.type);
-    }
-}
-
-function UsesUp(type, amount) {
-    return new UsesUpType(type, amount);
-}
-
-const STARTING_MATERIALS = new Set([
-    ReqTypes.THERAPIST,
-    ReqTypes.PHYSICIAN,
-    ReqTypes.MONEY
-]);
-
-const STEPS = [
-    {
-        name: "File name change petition",
-        description: "Go to court and file a petition for name change!",
-        requirements: [UsesUp(ReqTypes.MONEY, 50)],
-        outputs: [ReqTypes.INITIAL_COURT_ORDER],
-    },
-    {
-        name: "Get copies of court order",
-        description: "Get a bunch of copies that you won't end up needing all of....",
-        requirements: [ReqTypes.INITIAL_COURT_ORDER],
-        outputs: [ReqTypes.COURT_ORDER]
-    },
-    {
-        name: "Request therapist letter",
-        description: "Get a therapist to give you a letter",
-        requirements: [ReqTypes.THERAPIST],
-        outputs: [ReqTypes.THERAPIST_LETTER]
-    },
-    {
-        name: "Request physician letter",
-        description: "Get a physician to give you a letter",
-        requirements: [ReqTypes.PHYSICIAN],
-        outputs: [ReqTypes.PHYSICIAN_LETTER]
-    },
-    {
-        name: "Go to Social Security",
-        description: "Thanks FDR",
-        requirements: [UsesUp(ReqTypes.COURT_ORDER, 1), UsesUp(ReqTypes.PHYSICIAN_LETTER, 1)],
-        outputs: [ReqTypes.SOCIAL_SECURITY_CARD, ReqTypes.DIGIAL_SOCIAL_SECURITY_UPDATE]
-    },
-    {
-        name: "Go to MVA HQ",
-        description: "Did you know Glen Burnie is actually still PG County?",
-        requirements: [UsesUp(ReqTypes.PHYSICIAN_LETTER, 1), UsesUp(ReqTypes.THERAPIST_LETTER, 1)],
-        outputs: [ReqTypes.MVA_LETTER]
-    },
-    {
-        name: "Go to MVA",
-        description: "Do that",
-        requirements: [ReqTypes.DIGIAL_SOCIAL_SECURITY_UPDATE, UsesUp(ReqTypes.MVA_LETTER, 1)],
-        outputs: [ReqTypes.DRIVERS_LICENSE]
-    },
-    {
-        name: "Go to passport place",
-        description: "Do that",
-        requirements: [UsesUp(ReqTypes.COURT_ORDER, 1), UsesUp(ReqTypes.PHYSICIAN_LETTER, 1)],
-        outputs: [ReqTypes.PASSPORT]
-    }
-];
+import {UsesUpType, nameOfReq} from './reqs';
+import {STEPS, STARTING_MATERIALS} from './data';
 
 class Loader extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { completedSteps: [] };
+    }
 
     getRawReq(req) {
         return (req instanceof UsesUpType) ? req.type : req;
@@ -130,7 +27,7 @@ class Loader extends React.Component {
         let remainingSteps = [];
         let nextSources = {...sources};
 
-        steps.forEach(step => {
+        Object.values(steps).forEach(step => {
             if (step.requirements.map(req => this.satisfiesRequirement(req, materials)).reduce((acc, curr) => acc && curr)) {
                 nextSteps.push(step);
                 nextMaterials = new Set([...nextMaterials, ...step.outputs]);
@@ -143,6 +40,10 @@ class Loader extends React.Component {
         return {
             nextMaterials: new Set(nextMaterials), nextSteps, remainingSteps, nextSources
         };
+    }
+
+    getAvailableSteps(materials) {
+        return this.getNextColumn(STEPS, materials, {}).nextSteps;
     }
 
     getColumnsWithSources() {
@@ -175,6 +76,26 @@ class Loader extends React.Component {
         )
     }
 
+    stepChecked(name) {
+        const index = this.state.completedSteps.find(el => el === name);
+        if (index !== undefined) {
+            this.setState(
+                oldState => ({
+                    completedSteps: oldState.completedSteps.splice(
+                        index,
+                        1
+                    )
+                })
+            )
+        } else {
+            this.setState(
+                oldState => ({
+                    completedSteps: [...oldState.completedSteps, name]
+                })
+            )
+        }
+    }
+
     render() {
         const columnsWithSources = this.getColumnsWithSources();
         const columns = columnsWithSources.columns;
@@ -197,6 +118,20 @@ class Loader extends React.Component {
                     }
                 )
         );
+
+        const currentMaterials = this.state.completedSteps.length === 0 ? STARTING_MATERIALS :
+            new Set(
+                [...this.state.completedSteps
+                    .map(stepName => STEPS[stepName].outputs)
+                    .reduce((acc, curr) => [...acc, ...curr]),
+                ...STARTING_MATERIALS]
+            );
+
+        let stepStatuses = {};
+        const availableNextSteps = this.getAvailableSteps(currentMaterials);
+
+        availableNextSteps.forEach(step => stepStatuses[step.name] = 'available');
+        this.state.completedSteps.forEach(stepName => stepStatuses[stepName] = 'done');
 
         return (
             <>
@@ -223,7 +158,20 @@ class Loader extends React.Component {
                     {columns.map(
                         (column, index) => (
                             <div className="column" key={index}>
-                                {column.map(step => <Step ref={stepRefs[step.name]} key={step.name} {...step} />)}
+                                {column.map(
+                                    step =>
+                                        <Step
+                                            ref={stepRefs[step.name]}
+                                            status={
+                                                step.name in stepStatuses ?
+                                                    stepStatuses[step.name] :
+                                                    ''
+                                            }
+                                            key={step.name}
+                                            onCheckClicked={this.stepChecked.bind(this)}
+                                            {...step}
+                                        />
+                                    )}
                             </div>
                         )
                     )}

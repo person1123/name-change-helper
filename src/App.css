@@ -8,8 +8,8 @@
 }
 
 .column {
-  min-width: 300px;
-  width: 300px;
+  min-width: 350px;
+  width: 350px;
   margin-left: 40px;
   margin-right: 40px;
 }
@@ -20,6 +20,7 @@
   margin-top: 20px;
   margin-bottom: 20px;
   padding: 20px;
+  display: flex;
 }
 .smallStep.available {
   background: #fff;
@@ -28,6 +29,10 @@
 .smallStep.done {
   background: #eee;
   border: 2px solid #ddd;
+}
+
+.stepLeftColumn {
+  flex: 0 0 50px;
 }
 
 .svgContainer {
